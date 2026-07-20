@@ -2133,21 +2133,27 @@ function exportClasswisePDF(jsPDF){
 loadLocal();
 
 // ✅ Auto-login (बिल्कुल पुरानी फ़ाइल जैसा – बिना 'name' के)
+function tryRestoreSession(user, attempt){
+  db.from('profiles').select('*').eq('id', user.id).single().then(function(prof){
+    if(prof.data && prof.data.is_active){
+      curUser = {
+        role: prof.data.role,
+        email: user.email,
+        id: user.id
+      };
+      enterApp();
+    } else if(prof.error && attempt < 3){
+      // Session abhi poori tarah attach nahi hui — thodi der ruk kar dobara try karein
+      setTimeout(function(){ tryRestoreSession(user, attempt + 1); }, 700);
+    } else {
+      db.auth.signOut();
+    }
+  });
+}
+
 db.auth.getSession().then(function(res){
   if(res.data && res.data.session && res.data.session.user){
-    var user = res.data.session.user;
-    db.from('profiles').select('*').eq('id', user.id).single().then(function(prof){
-      if(prof.data && prof.data.is_active){
-        curUser = {
-          role: prof.data.role,
-          email: user.email,
-          id: user.id
-        };
-        enterApp();
-      } else {
-        db.auth.signOut();
-      }
-    });
+    tryRestoreSession(res.data.session.user, 0);
   }
 });
 
