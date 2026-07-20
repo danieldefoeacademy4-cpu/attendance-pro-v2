@@ -473,7 +473,14 @@ tbody td{padding:9px 11px;vertical-align:middle}
 var SUPABASE_URL  = 'https://uzlcfjendppclnqueyas.supabase.co';
 var SUPABASE_KEY  = 'sb_publishable_wCjCxP4LYeHMmy4_4mKaCw_VI9lT6TO';
 
-var db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,        // login ek baar hone ke baad session save rahega
+    autoRefreshToken: true,      // token expire hone se pehle apne aap refresh ho jayega
+    storage: window.localStorage,
+    detectSessionInUrl: false
+  }
+});
 
 // ── STATE ─────────────────────────────────────────────────────────────
 var S = { school:{name:'My School',year:'2025-26'}, classes:[], records:[], holidays:[] };
